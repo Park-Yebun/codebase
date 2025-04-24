@@ -31,7 +31,14 @@ const parser = new Parser({
 
 (async () => {
   // 피드 목록
-  const feed = await parser.parseURL("https://yeburry.tistory.com/rss"); 
+  const feed = await parser.parseURL("https://yeburry.tistory.com/rss");
+
+
+  // 피드가 존재하지 않으면 예외처리
+  if (!feed.items || feed.items.length === 0) {
+    console.log("피드에 글이 없습니다.");
+    return;
+  }
 
   // 최신 5개의 글의 제목과 링크를 가져온 후 text에 추가
   for (let i = 0; i < 5; i++) {
