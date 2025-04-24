@@ -30,29 +30,33 @@ const parser = new Parser({
 });
 
 (async () => {
-  // 피드 목록
-  const feed = await parser.parseURL("https://yeburry.tistory.com/rss");
+  try {
+    const feed = await parser.parseURL("https://yeburry.tistory.com/rss");
 
+    if (!feed.items || feed.items.length === 0) {
+      console.log("피드에 글이 없습니다.");
+      return;
+    }
 
-  // 피드가 존재하지 않으면 예외처리
-  if (!feed.items || feed.items.length === 0) {
-    console.log("피드에 글이 없습니다.");
-    return;
+    const postCount = Math.min(feed.items.length, 5);
+
+    for (let i = 0; i < postCount; i++) {
+      const item = feed.items[i];
+      if (!item || !item.title || !item.link) {
+        console.warn(`${i + 1}번째 항목이 비어있거나 필드가 없음`);
+        continue;
+      }
+
+      const { title, link } = item;
+      console.log(`${i + 1}번째 게시물`);
+      console.log(`추가될 제목: ${title}`);
+      console.log(`추가될 링크: ${link}`);
+      text += `- [${title}](${link})\n`;  // 마크다운 스타일이 더 깔끔!
+    }
+
+    writeFileSync("README.md", text, "utf8");
+    console.log("README.md 업데이트 완료");
+  } catch (err) {
+    console.error("오류 발생:", err.message);
   }
-
-  // 최신 5개의 글의 제목과 링크를 가져온 후 text에 추가
-  for (let i = 0; i < 5; i++) {
-    const { title, link } = feed.items[i];
-    console.log(`${i + 1}번째 게시물`);
-    console.log(`추가될 제목: ${title}`);
-    console.log(`추가될 링크: ${link}`);
-    text += `<a href=${link}>${title}</a></br>`;
-  }
-
-  // README.md 파일 작성
-  writeFileSync("README.md", text, "utf8", (e) => {
-    console.log(e);
-  });
-
-  console.log("업데이트 완료");
 })();
